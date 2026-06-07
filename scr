@@ -1,1 +1,135 @@
+// Pin lampu jalur 1
+#define RED1    4
+#define YELLOW1 5
+#define GREEN1  6
 
+// Pin lampu jalur 2
+#define RED2    8
+#define YELLOW2 9
+#define GREEN2  10
+
+// Pin lampu jalur 3
+#define RED3    11
+#define YELLOW3 12
+#define GREEN3  13
+
+// Pin tombol & buzzer
+#define BTN_PIN    2
+#define BUZZER_PIN 3
+
+// Durasi (ms)
+#define GREEN_TIME    4000
+#define YELLOW_TIME   1000
+#define RED_CROSS     5000
+
+// Nada
+#define DO  262
+#define RE  294
+#define MI  330
+#define FA  349
+#define SOL 392
+#define LA  440
+#define SI  494
+#define DO2 523
+
+// ===================== FUNGSI =====================
+
+void playNote(int freq, int duration) {
+  tone(BUZZER_PIN, freq, duration);
+  delay(duration + 30);
+  noTone(BUZZER_PIN);
+}
+
+void kartiniIntro() {
+  playNote(DO,  600); // I
+  playNote(RE,  300); // bu
+  playNote(MI,  300); // ki
+  playNote(FA,  300); // ta
+  playNote(SOL, 700); // Kar
+  playNote(MI,  300); // ti
+  playNote(DO,  700); // ni
+}
+
+void allRed() {
+  digitalWrite(GREEN1, LOW);  digitalWrite(YELLOW1, LOW);  digitalWrite(RED1, HIGH);
+  digitalWrite(GREEN2, LOW);  digitalWrite(YELLOW2, LOW);  digitalWrite(RED2, HIGH);
+  digitalWrite(GREEN3, LOW);  digitalWrite(YELLOW3, LOW);  digitalWrite(RED3, HIGH);
+}
+
+void setJalur(int jalur) {
+  allRed();
+  if (jalur == 1) {
+    digitalWrite(RED1, LOW); digitalWrite(GREEN1, HIGH);
+  } else if (jalur == 2) {
+    digitalWrite(RED2, LOW); digitalWrite(GREEN2, HIGH);
+  } else if (jalur == 3) {
+    digitalWrite(RED3, LOW); digitalWrite(GREEN3, HIGH);
+  }
+}
+
+void transisiKuning(int jalur) {
+  if (jalur == 1) {
+    digitalWrite(GREEN1, LOW); digitalWrite(YELLOW1, HIGH);
+  } else if (jalur == 2) {
+    digitalWrite(GREEN2, LOW); digitalWrite(YELLOW2, HIGH);
+  } else if (jalur == 3) {
+    digitalWrite(GREEN3, LOW); digitalWrite(YELLOW3, HIGH);
+  }
+  delay(YELLOW_TIME);
+}
+
+// ===================== SETUP & LOOP =====================
+
+int jalurAktif = 1;
+unsigned long waktuMulai = 0;
+bool sedangHijau = false;
+
+void setup() {
+  pinMode(RED1, OUTPUT);    pinMode(YELLOW1, OUTPUT);   pinMode(GREEN1, OUTPUT);
+  pinMode(RED2, OUTPUT);    pinMode(YELLOW2, OUTPUT);   pinMode(GREEN2, OUTPUT);
+  pinMode(RED3, OUTPUT);    pinMode(YELLOW3, OUTPUT);   pinMode(GREEN3, OUTPUT);
+  pinMode(BTN_PIN, INPUT_PULLUP);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  allRed();
+}
+
+void loop() {
+  // Cek tombol penyeberangan
+  if (digitalRead(BTN_PIN) == LOW) {
+    delay(50); // debounce
+    if (digitalRead(BTN_PIN) == LOW) {
+      if (sedangHijau) transisiKuning(jalurAktif);
+
+      allRed();
+      kartiniIntro(); // ← ganti buzzerBeep dengan kartiniIntro
+
+      // Bip tiap detik selama penyeberangan
+      for (int i = 0; i < RED_CROSS / 1000; i++) {
+        tone(BUZZER_PIN, 800, 100);
+        delay(1000);
+      }
+      noTone(BUZZER_PIN);
+
+      jalurAktif = (jalurAktif % 3) + 1;
+      setJalur(jalurAktif);
+      waktuMulai = millis();
+      sedangHijau = true;
+      return;
+    }
+  }
+
+  // Logika normal traffic light
+  if (!sedangHijau) {
+    setJalur(jalurAktif);
+    waktuMulai = millis();
+    sedangHijau = true;
+  }
+
+  if (sedangHijau && millis() - waktuMulai >= GREEN_TIME) {
+    transisiKuning(jalurAktif);
+    jalurAktif = (jalurAktif % 3) + 1;
+    setJalur(jalurAktif);
+    waktuMulai = millis();
+  }
+}
