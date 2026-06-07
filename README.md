@@ -12,3 +12,8 @@ Cara kerja Sistem:
   1.Mode Normal (Otomatis): Lampu lalu lintas untuk 3 jalur kendaraan berganti antara Merah, Kuning, dan Hijau secara bergiliran berdasarkan durasi waktu yang telah diprogram.
   
   2.Mode Penyeberangan (Interaktif): Di sisi jalan terdapat tombol push-button. Ketika pejalan kaki menekan tombol, sistem akan mencatat permintaan tersebut. Sistem tidak akan langsung memotong lampu hijau kendaraan yang sedang aktif (untuk mencegah kecelakaan mendadak).
+
+
+
+Link Vidio Youtube :
+https://youtu.be/VJW2CBIoIfE
